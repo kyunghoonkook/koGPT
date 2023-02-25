@@ -1,30 +1,21 @@
+import Head from "next/head";
 import { useState } from "react";
 import styles from "./index.module.css";
-import { Configuration, OpenAIApi } from "openai";
-export default function App() {
+
+export default function Home() {
   const [animalInput, setAnimalInput] = useState("");
   const [result, setResult] = useState();
-
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-  const openai = new OpenAIApi(configuration);
-  const prompt =
-    "인간처럼 생각하고, 행동하는 '지능'을 통해 인류가 이제까지 풀지 못했던";
 
   async function onSubmit(event) {
     event.preventDefault();
     try {
-      const completion = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: prompt,
-        temperature: 0.6,
-        max_tokens: 256,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ animal: animalInput }),
       });
-      res.status(200).json({ result: completion.data.choices[0].text });
 
       const data = await response.json();
       if (response.status !== 200) {
@@ -45,17 +36,23 @@ export default function App() {
 
   return (
     <div>
+      <Head>
+        <title>경훈GPT</title>
+        <link rel="icon" href="/dog.png" />
+      </Head>
+
       <main className={styles.main}>
-        <h3>Name my pet</h3>
+        <img src="/dog.png" className={styles.icon} />
+        <h3>경훈GPT</h3>
         <form onSubmit={onSubmit}>
           <input
             type="text"
             name="animal"
-            placeholder="Enter an animal"
+            placeholder="경훈봇에게 질문하세요"
             value={animalInput}
             onChange={(e) => setAnimalInput(e.target.value)}
           />
-          <input type="submit" value="Generate names" />
+          <input type="submit" value="질문하세요" />
         </form>
         <div className={styles.result}>{result}</div>
       </main>
